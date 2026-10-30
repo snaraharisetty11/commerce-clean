@@ -270,7 +270,7 @@ The successful 100K pipeline run produced 20,435 pending review candidates. The 
 
 - Secrets and database passwords are supplied through environment variables.
 - `.env` files are excluded from Git.
-- Local database files and generated exports are excluded from source control.
+- Local database files and environment secrets are excluded from source control. Selected synthetic datasets and reconciliation outputs are intentionally included as assessment evidence.
 - Original source records are retained during merge operations.
 - Use only synthetic, public, or explicitly authorized datasets.
 - Do not upload personal, confidential, or customer information to public repositories.
@@ -330,3 +330,68 @@ commerce-clean/
 CommerceClean demonstrates a modular and explainable approach to entity resolution and record deduplication, with particular attention to validation, matching, survivorship, data integrity, and lineage.
 
 The emphasis is on a working, testable end-to-end foundation with clearly documented assumptions and limitations, rather than claiming an unfinished enterprise-scale platform.
+
+## 14. Submission Deliverables
+
+### 14.1 Documentation
+
+The following documentation files describe the expected results, testing evidence, and use of AI assistance during development.
+
+- [Expected Results](docs/expected_results.md)
+- [Test Execution Evidence](docs/test_execution_evidence.md)
+- [AI Prompt History](docs/ai_prompt_history.md)
+
+### 14.2 Generated Datasets
+
+CommerceClean includes deterministic synthetic customer and product datasets for reproducible testing.
+
+| Dataset | Records |
+|---|---:|
+| Small | 100 |
+| Medium | 10,000 |
+| Large | 100,000 |
+
+Dataset generation script:
+
+```powershell
+python scripts/generate_dataset.py --size 100000 --seed 42 --output-dir data/generated/large
+```
+
+Expected labels are provided as evaluation ground truth and must not be supplied as input to the matching pipeline.
+
+### 14.3 Actual Database Reconciliation Results
+
+The following results were obtained from the application database on October 30, 2026.
+
+| Metric | Result |
+|---|---:|
+| Pipeline runs | 45 |
+| Source records | 364,909 |
+| Duplicate reviews | 63,619 |
+| Pending reviews | 63,616 |
+| Confirmed reviews | 3 |
+| Merged records | 2 |
+| Customer merged records | 1 |
+| Product merged records | 1 |
+| Lineage entries | 4 |
+| Confirmed reviews without lineage | 1 |
+
+One confirmed review remains unmerged. It is not counted as a completed merge.
+
+### 14.4 Reconciliation Output Files
+
+The following files contain actual database exports:
+
+- [Merged Records CSV](outputs/sample_merged_records.csv)
+- [Duplicate Review Queue CSV](outputs/sample_review_queue.csv)
+- [Reconciliation Report JSON](outputs/reconciliation_report.json)
+
+### 14.5 Reproducibility Scripts
+
+| Script | Purpose |
+|---|---|
+| `scripts/generate_dataset.py` | Generate deterministic synthetic datasets |
+| `scripts/export_submission.py` | Export merged records and duplicate reviews |
+| `scripts/export_report.py` | Generate the reconciliation report |
+
+The export scripts read existing application database records. They do not automatically confirm reviews or merge records.

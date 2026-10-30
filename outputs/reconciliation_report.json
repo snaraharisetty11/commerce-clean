@@ -1,0 +1,19 @@
+{
+  "generated_at": "2026-10-30T15:06:08.963050+00:00",
+  "source": "Actual Django application database",
+  "pipeline_runs": 45,
+  "source_records": 364909,
+  "duplicate_reviews": 63619,
+  "review_status_counts": {
+    "PENDING": 63616,
+    "CONFIRMED": 3
+  },
+  "merged_records": 2,
+  "merged_records_by_type": {
+    "PRODUCT": 1,
+    "CUSTOMER": 1
+  },
+  "lineage_entries": 4,
+  "confirmed_reviews_without_lineage": 1,
+  "interpretation": "Confirmed reviews without lineage are not counted as completed merges."
+}

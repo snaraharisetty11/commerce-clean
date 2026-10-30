@@ -1,0 +1,20 @@
+{
+    "dataset_type": "CommerceClean customer test data",
+    "generator_version": "1.0",
+    "record_count": 100,
+    "random_seed": 42,
+    "category_counts": {
+        "normal": 65,
+        "exact_duplicate": 10,
+        "near_duplicate": 8,
+        "missing_name": 5,
+        "missing_email": 5,
+        "invalid_email": 4,
+        "boundary": 3
+    },
+    "valid_count": 86,
+    "invalid_count": 14,
+    "input_file": "customers.csv",
+    "ground_truth_file": "expected_labels.csv",
+    "note": "Expected labels are for evaluation only. Do not provide them to the reconciliation pipeline."
+}
