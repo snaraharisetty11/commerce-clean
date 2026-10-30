@@ -190,14 +190,28 @@ Never commit `.env` or share actual credentials.
 
 ### Step 5: Configure the database
 
-For PostgreSQL:
+Choose one of the following configurations.
+
+**Option A: SQLite (verified local-testing workflow)**
+
+In PowerShell, select the provided SQLite settings and set a local development secret:
+
+```powershell
+$env:DJANGO_SETTINGS_MODULE = "config.sqlite_settings"
+$env:DJANGO_SECRET_KEY = "local-development-only-change-this-key"
+```
+
+This SQLite configuration was verified from a fresh clone: migrations completed, Django system checks reported no issues, and all 100 automated tests passed.
+
+**Option B: PostgreSQL**
 
 1. Install and start PostgreSQL.
 2. Create a local database for CommerceClean.
-3. Configure the database name, username, host, port, and password in the application settings or environment variables.
+3. Configure the database name, username, host, port, password, and Django secret using the application's supported environment variables.
 4. Ensure the PostgreSQL service is running.
+5. Install the full dependencies as described in Step 3.
 
-SQLite is supported through `config.sqlite_settings` and was successfully verified for fresh-clone migrations, Django system checks, and all 100 automated tests.
+The PostgreSQL setup is documented as an alternative; the fresh-clone verification reported above was performed with SQLite.
 
 ### Step 6: Apply database migrations
 
@@ -343,21 +357,27 @@ The following documentation files describe the expected results, testing evidenc
 
 ### 14.2 Generated Datasets
 
-CommerceClean includes deterministic synthetic customer and product datasets for reproducible testing.
+CommerceClean includes sample customer and product CSV files for demonstrating the ingestion workflow. The current synthetic dataset generator produces deterministic **customer records only**; product sample data is maintained separately.
 
-| Dataset | Records |
-|---|---:|
-| Small | 100 |
-| Medium | 10,000 |
-| Large | 100,000 |
+Generate a 1,000-record demo dataset:
 
-Dataset generation script:
+```powershell
+python scripts/generate_dataset.py --size 1000 --seed 42 --output-dir data/generated/demo
+```
+
+Generate a larger 100,000-record customer dataset:
 
 ```powershell
 python scripts/generate_dataset.py --size 100000 --seed 42 --output-dir data/generated/large
 ```
 
-Expected labels are provided as evaluation ground truth and must not be supplied as input to the matching pipeline.
+Each generated output directory contains:
+
+- `customers.csv`
+- `expected_labels.csv`
+- `dataset_manifest.json`
+
+The 1,000-record demo dataset was successfully generated with seed `42`. Expected labels are evaluation ground truth and must not be supplied as input to the matching pipeline.
 
 ### 14.3 Actual Database Reconciliation Results
 
