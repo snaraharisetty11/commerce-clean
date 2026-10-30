@@ -168,9 +168,20 @@ python -m venv .venv
 
 ### Step 3: Install dependencies
 
+For the verified SQLite local-testing workflow, install the Django dependencies:
+
 ```powershell
-python -m pip install --upgrade pip
-pip install -r requirements.txt
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install Django==6.1.2 python-dotenv==1.1.1
+```
+
+The SQLite workflow does not require `psycopg2-binary`.
+
+For PostgreSQL, install the full dependency list, including the PostgreSQL adapter:
+
+```powershell
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install -r requirements.txt
 ```
 
 ### Step 4: Configure environment variables
