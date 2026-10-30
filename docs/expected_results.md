@@ -1,12 +1,12 @@
-
-# Commerce Clean — Sample Data and Expected Results
+# CommerceClean — Sample Data and Expected Results
 
 ## Purpose
 
-The sample CSV files demonstrate ingestion, validation,
-normalization, duplicate candidate generation, and review creation.
+The sample CSV files demonstrate ingestion, validation, normalization, duplicate candidate generation, and review creation.
 
-## Source schemas
+This document describes the sample customer and product schemas, expected sample results, synthetic dataset generation, and verification instructions.
+
+## Source Schemas
 
 ### Customers
 
@@ -27,9 +27,13 @@ normalization, duplicate candidate generation, and review creation.
 | price | Decimal-like string | Required, numeric, finite, non-negative |
 | brand | String | Optional |
 
-## Sample customer dataset
+---
+
+## Sample Customer Dataset
 
 File: `data/sample_customers.csv`
+
+Expected results:
 
 - Input rows: 6
 - Expected valid records: 3
@@ -37,12 +41,17 @@ File: `data/sample_customers.csv`
 - Expected duplicate source IDs skipped: 0
 - Expected duplicate candidate: C001 and C002
 
-The rejected records include an invalid email, a missing customer name,
-and a missing source_record_id.
+The rejected records include:
 
-## Sample product dataset
+- An invalid email.
+- A missing customer name.
+- A missing `source_record_id`.
+
+## Sample Product Dataset
 
 File: `data/sample_products.csv`
+
+Expected results:
 
 - Input rows: 5
 - Expected valid records: 3
@@ -50,53 +59,131 @@ File: `data/sample_products.csv`
 - Expected duplicate source IDs skipped: 0
 - Expected duplicate candidate: P001 and P002
 
-The rejected records include a negative price and a missing SKU.
+The rejected records include:
 
-## Generate larger datasets
+- A negative price.
+- A missing SKU.
 
-From the project root, run:
+---
 
-```powershell
-python scripts/generate_dataset.py --customers 1000 --products 1000 --seed 42
-```
+## Generate Larger Datasets
 
-Output files:
+From the project root, run the following commands.
 
-- `data/generated/customers.csv`
-- `data/generated/products.csv`
-
-Repeat the same command with the same parameters to reproduce the
-same generated CSV contents.
-
-To generate a larger benchmark input:
+### Generate a 1,000-record demo dataset
 
 ```powershell
-python scripts/generate_dataset.py --customers 10000 --products 10000 --seed 42
+python scripts/generate_dataset.py --size 1000 --seed 42 --output-dir data/generated/demo
 ```
 
-## Important count definitions
+### Generate a 100,000-record benchmark dataset
 
-- Input count: nonblank CSV data rows.
-- Valid count: records passing business validation and successfully saved.
-- Rejected count: invalid business records plus records rejected for
-  a missing source_record_id.
-- Duplicate count: repeated source_record_id values skipped during
-  ingestion, not business entities identified as duplicate candidates.
-- Review count: duplicate candidate reviews created or retrieved by
-  the matching service.
-- Published count: currently the number of MergedRecord rows assigned
-  to a pipeline run, as defined by the current implementation.
+```powershell
+python scripts/generate_dataset.py --size 100000 --seed 42 --output-dir data/generated/large
+```
+
+### Generated output files
+
+The generator currently creates the following files:
+
+- `customers.csv`
+- `expected_labels.csv`
+- `dataset_manifest.json`
+
+The output directory is determined by the `--output-dir` argument.
+
+### Verified demo dataset
+
+The 1,000-record dataset was successfully generated using seed `42`.
+
+| Scenario | Records |
+|---|---:|
+| Normal | 650 |
+| Exact duplicate | 100 |
+| Near duplicate | 80 |
+| Missing name | 50 |
+| Missing email | 50 |
+| Invalid email | 40 |
+| Boundary | 30 |
+| **Total** | **1,000** |
+
+The generator currently produces synthetic customer records only. Product sample data is maintained separately in `data/sample_products.csv`.
+
+Using the same seed and generation parameters is intended to reproduce the same synthetic dataset.
+
+**Important:** `expected_labels.csv` contains evaluation ground truth. It must not be supplied as input to the matching pipeline.
+
+---
+
+## Important Count Definitions
+
+- **Input count:** Nonblank CSV data rows.
+- **Valid count:** Records passing business validation and successfully saved.
+- **Rejected count:** Invalid business records plus records rejected for a missing `source_record_id`.
+- **Duplicate count:** Repeated `source_record_id` values skipped during ingestion, not business entities identified as duplicate candidates.
+- **Review count:** Duplicate candidate reviews created or retrieved by the matching service.
+- **Published count:** Currently the number of `MergedRecord` rows assigned to a pipeline run, as defined by the current implementation.
+
+---
 
 ## Verification
 
-Run the existing tests:
+CommerceClean provides automated tests covering the main application workflows.
+
+### Configure the SQLite test environment
+
+In PowerShell:
 
 ```powershell
-python manage.py test deduplication.tests
+$env:DJANGO_SETTINGS_MODULE = "config.sqlite_settings"
+$env:DJANGO_SECRET_KEY = "local-development-only-change-this-key"
 ```
 
-Expected current baseline: 70 passing tests.
+### Run database migrations
 
-Expected sample counts should be confirmed by running each CSV through
-the actual pipeline. Benchmark timing and memory usage must be measured
-separately; generated row counts alone do not prove scalability.
+```powershell
+python manage.py migrate
+```
+
+### Run Django system checks
+
+```powershell
+python manage.py check
+```
+
+### Execute the automated test suite
+
+```powershell
+python manage.py test
+```
+
+### Verified test baseline
+
+The automated test suite was successfully executed from a fresh repository clone using SQLite.
+
+| Metric | Verified result |
+|---|---:|
+| Tests discovered | 100 |
+| Tests passed | 100 |
+| Tests failed | 0 |
+| Execution time | 0.626 seconds |
+
+Expected test completion:
+
+```text
+Found 100 test(s).
+
+Ran 100 tests in 0.626s
+
+OK
+```
+
+The test suite covers validation, ingestion, matching, review, survivorship, merging, lineage, and invalid-operation handling.
+
+### Benchmark interpretation
+
+Benchmark timing, memory usage, and matching accuracy must be evaluated separately.
+
+Synthetic expected labels provide ground truth for evaluating candidate generation and matching. Generated row counts alone do not prove scalability or real-world accuracy.
+
+The 100,000-record benchmark results documented in the main README are synthetic benchmark measurements and should not be interpreted as guaranteed production performance.

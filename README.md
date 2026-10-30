@@ -104,12 +104,12 @@ CommerceClean follows a modular Django service architecture.
 
 | Technology | Version | Purpose |
 |---|---|---|
-| Python | 3.14.7 | Core programming language |
+| Python | 3.14.7 (tested environment) | Core programming language |
 | Django | 6.1.2 | Web framework and ORM |
 | python-dotenv | 1.1.1 | Environment variable loading |
-| PostgreSQL | 18 | Relational database |
+| PostgreSQL | 18 | Relational database option |
 | psycopg2-binary | 2.9.10 | PostgreSQL adapter |
-| SQLite | As configured | Alternative local database |
+| SQLite | Provided configuration | Local development and testing |
 
 ## 5. Data Dictionary
 
@@ -197,7 +197,7 @@ For PostgreSQL:
 3. Configure the database name, username, host, port, and password in the application settings or environment variables.
 4. Ensure the PostgreSQL service is running.
 
-SQLite may be used through the provided SQLite settings configuration if supported by the application workflow.
+SQLite is supported through `config.sqlite_settings` and was successfully verified for fresh-clone migrations, Django system checks, and all 100 automated tests.
 
 ### Step 6: Apply database migrations
 
