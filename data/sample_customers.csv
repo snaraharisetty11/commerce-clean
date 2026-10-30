@@ -1,0 +1,7 @@
+﻿source_record_id,name,email,phone
+C001,Alice Smith,alice@example.com,5551112222
+C002,Alice Smith,alice@example.com,5551112222
+C003,Bob Jones,bob@example.com,5553334444
+C004,Charlie Brown,not-an-email,5552223333
+C005,,emptyname@example.com,5554445555
+,Dana Reed,dana@example.com,5551113333

@@ -1,0 +1,6 @@
+﻿source_record_id,name,sku,price,brand
+P001,Wireless Mouse,WM-100,19.99,Acme
+P002,Wireless Mouse,WM-100,19.99,Acme
+P003,USB Keyboard,UK-200,29.99,Acme
+P004,Monitor,MON-300,-100,ViewMax
+P005,USB Hub,,12.50,ConnectPro

@@ -1,0 +1,286 @@
+
+{% extends "deduplication/base.html" %}
+
+{% block title %}Duplicate Review{% endblock %}
+{% block crumb %}REVIEW CENTER{% endblock %}
+
+{% block content %}
+
+<div class="head">
+    <div>
+        <div class="eyebrow">Human-in-the-loop matching</div>
+        <h1>Duplicate review center</h1>
+        <p class="muted">
+            Compare both source records and record a decision with match evidence.
+        </p>
+    </div>
+</div>
+
+<!-- Review statistics -->
+<div class="stats">
+    <div class="stat">
+        <span>Matching reviews</span>
+        <strong>{{ paginator.count }}</strong>
+    </div>
+
+    <div class="stat">
+        <span>Pending</span>
+        <strong>{{ review_counts.pending }}</strong>
+    </div>
+
+    <div class="stat">
+        <span>Confirmed</span>
+        <strong>{{ review_counts.confirmed }}</strong>
+    </div>
+
+    <div class="stat">
+        <span>Not duplicates</span>
+        <strong>{{ review_counts.not_duplicate }}</strong>
+    </div>
+</div>
+
+<!-- Filters -->
+<section class="panel">
+    <form method="get" class="formrow">
+
+        <div class="field">
+            <label>Status</label>
+            <select name="status">
+                <option value="">All</option>
+                <option value="PENDING"
+                    {% if status_filter == "PENDING" %}selected{% endif %}>
+                    Pending
+                </option>
+                <option value="CONFIRMED"
+                    {% if status_filter == "CONFIRMED" %}selected{% endif %}>
+                    Confirmed
+                </option>
+                <option value="NOT_DUPLICATE"
+                    {% if status_filter == "NOT_DUPLICATE" %}selected{% endif %}>
+                    Not duplicate
+                </option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Record type</label>
+            <select name="record_type">
+                <option value="">All types</option>
+                <option value="CUSTOMER"
+                    {% if record_type_filter == "CUSTOMER" %}selected{% endif %}>
+                    Customers
+                </option>
+                <option value="PRODUCT"
+                    {% if record_type_filter == "PRODUCT" %}selected{% endif %}>
+                    Products
+                </option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Run</label>
+            <select name="run">
+                <option value="">All runs</option>
+
+                {% for item in runs %}
+                <option value="{{ item.run_id }}"
+                    {% if run_filter == item.run_id|stringformat:"s" %}selected{% endif %}>
+                    {{ item.run_id|truncatechars:16 }}
+                </option>
+                {% endfor %}
+
+            </select>
+        </div>
+
+        <div style="align-self:end;margin-bottom:14px">
+            <button class="btn" type="submit">Apply filters</button>
+
+            <a class="btn secondary"
+               href="{% url 'duplicate_reviews' %}">
+                Reset
+            </a>
+        </div>
+
+    </form>
+</section>
+
+<!-- Review records -->
+{% for r in reviews %}
+
+<article class="review">
+
+    <div class="panelhead">
+        <div>
+            <strong>Candidate #{{ r.pk }}</strong>
+
+            <span class="badge {{ r.status }}">
+                {{ r.status }}
+            </span>
+
+            <div class="muted tiny">
+                {{ r.record_a.record_type }}
+                ·
+                {{ r.created_at|date:"M d, Y H:i" }}
+            </div>
+        </div>
+
+        <div style="text-align:right">
+            <strong style="font-size:24px;color:var(--blue)">
+                {{ r.confidence_score|floatformat:3 }}
+            </strong>
+            <div class="muted tiny">Confidence 0–1</div>
+        </div>
+    </div>
+
+    <div class="compare">
+
+        <!-- Record A -->
+        <div class="record">
+            <h3>
+                Record A ·
+                {{ r.record_a.source_record_id|default:r.record_a_id }}
+            </h3>
+
+            <div class="json">
+                {{ r.record_a.normalized_data }}
+            </div>
+
+            <details>
+                <summary>Raw values</summary>
+                <div class="json">
+                    {{ r.record_a.raw_data }}
+                </div>
+            </details>
+        </div>
+
+        <!-- Record B -->
+        <div class="record">
+            <h3>
+                Record B ·
+                {{ r.record_b.source_record_id|default:r.record_b_id }}
+            </h3>
+
+            <div class="json">
+                {{ r.record_b.normalized_data }}
+            </div>
+
+            <details>
+                <summary>Raw values</summary>
+                <div class="json">
+                    {{ r.record_b.raw_data }}
+                </div>
+            </details>
+        </div>
+
+    </div>
+
+    <!-- Match explanation -->
+    <div style="margin-top:12px">
+        <strong class="tiny">Match explanation</strong>
+
+        <p class="muted tiny">
+            {{ r.explanation|default:"No explanation available." }}
+        </p>
+    </div>
+
+    <!-- Review actions -->
+    {% if r.status == "PENDING" %}
+
+    <div class="actions">
+
+        <form method="post"
+              action="{% url 'decide_duplicate_review' r.pk %}">
+
+            {% csrf_token %}
+
+            <input type="hidden"
+                   name="decision"
+                   value="CONFIRMED">
+
+            <input type="hidden"
+                   name="next"
+                   value="{{ request.get_full_path }}">
+
+            <button class="btn green"
+                    type="submit"
+                    onclick="return confirm('Confirm these records are duplicates?')">
+                ✓ Confirm duplicate
+            </button>
+
+        </form>
+
+        <form method="post"
+              action="{% url 'decide_duplicate_review' r.pk %}">
+
+            {% csrf_token %}
+
+            <input type="hidden"
+                   name="decision"
+                   value="NOT_DUPLICATE">
+
+            <input type="hidden"
+                   name="next"
+                   value="{{ request.get_full_path }}">
+
+            <button class="btn red"
+                    type="submit"
+                    onclick="return confirm('Mark these records as not duplicates?')">
+                × Not a duplicate
+            </button>
+
+        </form>
+
+    </div>
+
+    {% endif %}
+
+</article>
+
+{% empty %}
+
+<section class="panel empty">
+    <strong>No candidates found</strong>
+    <p>Try clearing filters or upload a dataset.</p>
+</section>
+
+{% endfor %}
+
+<!-- Pagination -->
+{% if page_obj.paginator.num_pages > 1 %}
+
+<section class="panel"
+         style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:20px;flex-wrap:wrap;">
+
+    <div class="muted tiny">
+        Page {{ page_obj.number }}
+        of {{ page_obj.paginator.num_pages }}
+        · {{ paginator.count }} matching reviews
+    </div>
+
+    <div style="display:flex;gap:10px;align-items:center;">
+
+        {% if page_obj.has_previous %}
+
+        <a class="btn secondary"
+           href="?status={{ status_filter|urlencode }}&record_type={{ record_type_filter|urlencode }}&run={{ run_filter|urlencode }}&page={{ page_obj.previous_page_number }}">
+            ← Previous
+        </a>
+
+        {% endif %}
+
+        {% if page_obj.has_next %}
+
+        <a class="btn"
+           href="?status={{ status_filter|urlencode }}&record_type={{ record_type_filter|urlencode }}&run={{ run_filter|urlencode }}&page={{ page_obj.next_page_number }}">
+            Next →
+        </a>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+{% endif %}
+
+{% endblock %}

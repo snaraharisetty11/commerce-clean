@@ -1,0 +1,25 @@
+
+{% extends "deduplication/base.html" %}
+{% block title %}Clean records{% endblock %}
+{% block crumb %}CLEAN RECORDS{% endblock %}
+{% block content %}
+<div class="head"><div><div class="eyebrow">Golden records</div><h1>Clean records</h1>
+<p class="muted">Published canonical entities, survivorship explanations, and source lineage.</p></div></div>
+<section class="panel"><form method="get" class="actions">
+<select name="record_type" style="padding:10px;border:1px solid var(--line);border-radius:8px">
+<option value="">All types</option>
+<option value="CUSTOMER" {% if selected_type == "CUSTOMER" %}selected{% endif %}>Customers</option>
+<option value="PRODUCT" {% if selected_type == "PRODUCT" %}selected{% endif %}>Products</option>
+</select>
+<button class="btn">Filter</button><a class="btn secondary" href="{% url 'merged_records' %}">Reset</a>
+</form></section>
+<section class="panel"><div class="tablewrap"><table>
+<thead><tr><th>Canonical ID</th><th>Type</th><th>Run</th><th>Merged values</th><th>Survivorship</th><th>Lineage</th></tr></thead>
+<tbody>{% for r in records %}
+<tr><td>{{ r.canonical_id|truncatechars:18 }}</td><td><span class="badge">{{ r.record_type }}</span></td>
+<td><a href="{% url 'run_detail' r.run.run_id %}">{{ r.run.run_id|truncatechars:14 }}</a></td>
+<td><div class="json">{{ r.merged_data }}</div></td><td><div class="json">{{ r.survivorship_explanation }}</div></td>
+<td>{% for l in r.lineage.all %}<div class="tiny">{{ l.source_record.source_record_id|default:l.source_record_id }} · {{ l.source_record.source_system }}</div>{% empty %}—{% endfor %}</td></tr>
+{% empty %}<tr><td colspan="6" class="empty"><strong>No clean records published</strong>Confirm duplicates and merge a run to publish records.</td></tr>
+{% endfor %}</tbody></table></div></section>
+{% endblock %}

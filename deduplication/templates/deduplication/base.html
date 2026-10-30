@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}Workspace{% endblock %} · CommerceClean</title>
+
+<style>
+:root {
+    color-scheme: dark;
+    --bg: #0b1120;
+    --panel: #151f32;
+    --ink: #e5ecf6;
+    --muted: #9aaac2;
+    --line: #28364d;
+    --blue: #3b82f6;
+    --navy: #080e1c;
+    --green: #16a34a;
+    --red: #ef4444;
+    --amber: #f59e0b;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 14px/1.55 Inter, system-ui, Segoe UI, sans-serif;
+}
+
+a {
+    color: #7db2ff;
+    text-decoration: none;
+    transition: color .18s ease;
+}
+
+a:hover {
+    color: #bfdbfe;
+}
+
+/* Preserve the original layout and sidebar position */
+.layout {
+    display: grid;
+    grid-template-columns: 245px 1fr;
+    min-height: 100vh;
+}
+
+.side {
+    background: var(--navy);
+    padding: 25px 16px;
+    color: #dbe5f7;
+}
+
+.brand {
+    font-size: 19px;
+    font-weight: 850;
+    color: #fff;
+    padding: 0 9px 25px;
+    display: block;
+}
+
+.brand b {
+    background: linear-gradient(135deg, #80a5ff, #315be8);
+    padding: 8px 11px;
+    border-radius: 11px;
+    margin-right: 9px;
+}
+
+.navlabel {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: #8496b7;
+    padding: 8px 12px;
+}
+
+.nav a {
+    display: block;
+    padding: 11px 12px;
+    margin: 3px 0;
+    border-radius: 9px;
+    color: #cbd6eb;
+    transition: background .18s ease, color .18s ease;
+}
+
+.nav a:hover {
+    background: #1d3154;
+    color: #fff;
+    box-shadow: inset 3px 0 #60a5fa;
+}
+
+.main {
+    min-width: 0;
+}
+
+.top {
+    height: 72px;
+    background: #101a2ded;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.top small {
+    color: var(--muted);
+}
+
+.pill {
+    background: #1d3154;
+    color: #93c5fd;
+    border-radius: 30px;
+    padding: 7px 12px;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.content {
+    max-width: 1500px;
+    margin: auto;
+    padding: 28px 30px;
+}
+
+.head {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    align-items: start;
+    margin-bottom: 22px;
+}
+
+.eyebrow {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--blue);
+    font-weight: 850;
+    text-transform: uppercase;
+}
+
+.head h1 {
+    font-size: 28px;
+    letter-spacing: -.7px;
+    margin: 5px 0;
+}
+
+.muted {
+    color: var(--muted);
+}
+
+.tiny {
+    font-size: 11px;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    border: 0;
+    border-radius: 9px;
+    padding: 10px 14px;
+    background: #1d4ed8;
+    color: #fff;
+    font-weight: 750;
+    cursor: pointer;
+    transition: filter .18s ease, transform .18s ease,
+                box-shadow .18s ease;
+}
+
+.btn:hover {
+    filter: brightness(1.12);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 16px #1d4ed833;
+}
+
+.btn.secondary {
+    background: #25334a;
+    color: #dce7f7;
+    border: 1px solid #344761;
+}
+
+.btn.green {
+    background: #15803d;
+}
+
+.btn.red {
+    background: #3b1d2a;
+    color: #fca5a5;
+    border: 1px solid #653044;
+}
+
+.btn.small {
+    padding: 6px 9px;
+    font-size: 11px;
+}
+
+.btn:focus-visible,
+.nav a:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid #60a5fa;
+    outline-offset: 2px;
+}
+
+/* Metric widgets: different accent colors, same positions */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat,
+.panel,
+.review {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    padding: 19px;
+    box-shadow: 0 12px 30px #00000024;
+    margin-bottom: 18px;
+    transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.stat span {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.stat strong {
+    display: block;
+    font-size: 29px;
+    margin-top: 8px;
+}
+
+.stat:nth-child(1) {
+    background: linear-gradient(145deg, #172744, #151f32);
+    border-top: 2px solid #3b82f6;
+}
+
+.stat:nth-child(2) {
+    background: linear-gradient(145deg, #12352f, #151f32);
+    border-top: 2px solid #16a34a;
+}
+
+.stat:nth-child(3) {
+    background: linear-gradient(145deg, #3a202a, #151f32);
+    border-top: 2px solid #ef4444;
+}
+
+.stat:nth-child(4) {
+    background: linear-gradient(145deg, #392e1a, #151f32);
+    border-top: 2px solid #f59e0b;
+}
+
+.stat:hover,
+.panel:hover,
+.review:hover {
+    border-color: #3b82f688;
+    box-shadow: 0 14px 34px #00000035;
+}
+
+/* Panels and tables */
+.panelhead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.panel h2 {
+    font-size: 16px;
+    margin: 0;
+}
+
+.tablewrap {
+    overflow: auto;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 650px;
+}
+
+th {
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    font-size: 10px;
+    color: #a8b8d0;
+    background: #1c2a40;
+    padding: 12px;
+}
+
+td {
+    padding: 12px;
+    border-top: 1px solid var(--line);
+    vertical-align: top;
+}
+
+tbody tr:hover {
+    background: #1a2940;
+}
+
+/* Status badges */
+.badge {
+    display: inline-block;
+    border-radius: 20px;
+    background: #25334a;
+    color: #cbd5e1;
+    padding: 4px 8px;
+    font-size: 10px;
+    font-weight: 850;
+}
+
+.badge.COMPLETED,
+.badge.CONFIRMED {
+    background: #12392f;
+    color: #86efac;
+}
+
+.badge.PENDING,
+.badge.RUNNING {
+    background: #3a2d17;
+    color: #fcd34d;
+}
+
+.badge.FAILED,
+.badge.NOT_DUPLICATE {
+    background: #3b1d2a;
+    color: #fda4af;
+}
+
+/* Form controls */
+.field {
+    display: grid;
+    gap: 6px;
+    margin: 0 0 14px;
+}
+
+.field label {
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.field input,
+.field select {
+    padding: 11px;
+    border: 1px solid #344761;
+    border-radius: 9px;
+    background: #101a2b;
+    color: var(--ink);
+    font: inherit;
+    width: 100%;
+    color-scheme: dark;
+}
+
+.field input:focus,
+.field select:focus,
+textarea:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px #3b82f622;
+}
+
+.formrow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+/* Alerts */
+.alert {
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #1b2d4d;
+    color: #bfdbfe;
+    border: 1px solid #2e4e7e;
+    margin-bottom: 10px;
+}
+
+.alert.error {
+    background: #3b1d2a;
+    color: #fda4af;
+    border-color: #653044;
+}
+
+.alert.success {
+    background: #12392f;
+    color: #86efac;
+    border-color: #1c5c49;
+}
+
+/* Record comparison and JSON data */
+.empty {
+    text-align: center;
+    padding: 32px;
+    color: var(--muted);
+}
+
+.empty strong {
+    display: block;
+    color: var(--ink);
+}
+
+.compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.record {
+    background: #111b2d;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    padding: 14px;
+    min-width: 0;
+}
+
+.record h3 {
+    font-size: 13px;
+    margin: 0 0 8px;
+}
+
+.json {
+    font: 11px/1.5 ui-monospace, monospace;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: #0d1626;
+    color: #cbd5e1;
+    border: 1px solid #26364d;
+    padding: 10px;
+    border-radius: 8px;
+    max-height: 180px;
+    overflow: auto;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+}
+
+.foot {
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px;
+    padding: 18px;
+}
+
+/* Small visual finishing touches */
+::selection {
+    background: #1d4ed8;
+    color: #fff;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #7487a3;
+}
+
+textarea {
+    background: #101a2b;
+    color: var(--ink);
+    border: 1px solid #344761;
+    border-radius: 9px;
+}
+
+select {
+    color-scheme: dark;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid var(--line);
+}
+
+/* Preserve the existing responsive layout */
+@media (max-width: 850px) {
+    .layout {
+        grid-template-columns: 1fr;
+    }
+
+    .side {
+        padding: 12px;
+    }
+
+    .brand {
+        padding: 4px 7px 12px;
+    }
+
+    .nav {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .navlabel {
+        display: none;
+    }
+
+    .content {
+        padding: 18px 12px;
+    }
+
+    .top {
+        padding: 0 15px;
+    }
+
+    .stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .compare,
+    .formrow {
+        grid-template-columns: 1fr;
+    }
+
+    .head {
+        display: block;
+    }
+
+    .head .btn {
+        margin-top: 10px;
+    }
+}
+
+@media (max-width: 450px) {
+    .nav {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stats {
+        gap: 9px;
+    }
+
+    .stat {
+        padding: 13px;
+    }
+
+    .stat strong {
+        font-size: 24px;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="layout">
+
+    <aside class="side">
+        <a class="brand" href="{% url 'dashboard' %}">
+            <b>C</b>CommerceClean
+        </a>
+
+        <div class="navlabel">DATA WORKSPACE</div>
+
+        <nav class="nav">
+            <a href="{% url 'dashboard' %}">▦ Overview</a>
+            <a href="{% url 'upload_csv' %}">⇧ Import data</a>
+            <a href="{% url 'run_list' %}">◷ Pipeline runs</a>
+            <a href="{% url 'duplicate_reviews' %}">⌕ Duplicate review</a>
+            <a href="{% url 'merged_records' %}">▤ Clean records</a>
+            <a href="/admin/">⚙ Admin</a>
+        </nav>
+
+        <div class="muted tiny"
+             style="padding:20px 10px;color:#9aabc8">
+            Explainable matching · Auditable lineage
+        </div>
+    </aside>
+
+    <main class="main">
+
+        <header class="top">
+            <div>
+                <small>
+                    COMMERCECLEAN / {% block crumb %}WORKSPACE{% endblock %}
+                </small>
+
+                <div style="font-weight:800">
+                    {% block top_title %}Data quality workspace{% endblock %}
+                </div>
+            </div>
+
+            <span class="pill">● DATA QUALITY</span>
+        </header>
+
+        <div class="content">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% block content %}{% endblock %}
+
+            <div class="foot">
+                CommerceClean · Validate → Match → Review → Publish
+            </div>
+        </div>
+
+    </main>
+</div>
+</body>
+</html>

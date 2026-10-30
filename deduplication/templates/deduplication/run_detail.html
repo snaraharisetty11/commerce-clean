@@ -1,0 +1,185 @@
+
+{% extends "deduplication/base.html" %}
+{% block title %}Run detail{% endblock %}
+{% block crumb %}RUN DETAIL{% endblock %}
+
+{% block content %}
+<div class="head">
+    <div>
+        <div class="eyebrow">Pipeline audit</div>
+        <h1>Run detail</h1>
+        <p class="muted">{{ run.run_id }} · {{ run.record_type|default:"Data" }}</p>
+    </div>
+    <a class="btn secondary" href="{% url 'run_list' %}">← All runs</a>
+</div>
+
+<div class="stats">
+    <div class="stat"><span>Input rows</span><strong>{{ run.input_count|default:0 }}</strong></div>
+    <div class="stat"><span>Valid</span><strong>{{ run.valid_count|default:0 }}</strong></div>
+    <div class="stat"><span>Rejected</span><strong>{{ run.rejected_count|default:0 }}</strong></div>
+    <div class="stat"><span>Pending reviews</span><strong>{{ pending_count }}</strong></div>
+</div>
+
+<section class="panel">
+    <div class="panelhead">
+        <h2>Run controls & exports</h2>
+        <span class="badge {{ run.status }}">{{ run.status }}</span>
+    </div>
+
+    <div class="actions">
+        <a class="btn secondary" href="{% url 'export_run' run.run_id 'records' %}">Export records</a>
+        <a class="btn secondary" href="{% url 'export_run' run.run_id 'reviews' %}">Export reviews</a>
+        <a class="btn secondary" href="{% url 'export_run' run.run_id 'rejects' %}">Export rejects</a>
+        <a class="btn secondary" href="{% url 'export_run' run.run_id 'merged' %}">Export merged</a>
+
+        <form method="post" action="{% url 'merge_run' run.run_id %}"
+              onsubmit="return confirm('Merge confirmed duplicate groups only?')">
+            {% csrf_token %}
+            <button class="btn green" type="submit">Merge confirmed groups</button>
+        </form>
+    </div>
+
+    {% if run.error_message %}
+        <p class="alert error">{{ run.error_message }}</p>
+    {% endif %}
+</section>
+
+<section class="panel">
+    <div class="panelhead">
+        <h2>Duplicate candidates</h2>
+        <a href="{% url 'duplicate_reviews' %}?run={{ run.run_id }}">Review center →</a>
+    </div>
+
+    <div class="tablewrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th><th>Record A</th><th>Record B</th>
+                    <th>Confidence (0–1)</th><th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in reviews %}
+                    <tr>
+                        <td>#{{ r.pk }}</td>
+                        <td>{{ r.record_a.source_record_id|default:r.record_a_id }}</td>
+                        <td>{{ r.record_b.source_record_id|default:r.record_b_id }}</td>
+                        <td>{{ r.confidence_score|floatformat:3 }}</td>
+                        <td><span class="badge {{ r.status }}">{{ r.status }}</span></td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="5" class="empty">No candidates for this run.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% include "deduplication/includes/pagination.html" with page_obj=reviews_page page_param="reviews_page" %}
+</section>
+
+<section class="panel">
+    <h2>Source records</h2>
+    <div class="tablewrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th><th>Source ID</th><th>Type</th>
+                    <th>Source system</th><th>Validation</th><th>Raw data</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in records %}
+                    <tr>
+                        <td>{{ r.pk }}</td>
+                        <td>{{ r.source_record_id|default:"—" }}</td>
+                        <td>{{ r.record_type }}</td>
+                        <td>{{ r.source_system }}</td>
+                        <td>
+                            <span class="badge">
+                                {% if r.is_valid %}VALID{% else %}INVALID{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <details>
+                                <summary>Inspect</summary>
+                                <div class="json">{{ r.raw_data }}</div>
+                                <div class="json">{{ r.validation_errors }}</div>
+                            </details>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="6" class="empty">No source records.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% include "deduplication/includes/pagination.html" with page_obj=records_page page_param="records_page" %}
+</section>
+
+<section class="panel">
+    <h2>Rejected rows</h2>
+    <div class="tablewrap">
+        <table>
+            <thead>
+                <tr><th>File</th><th>Row</th><th>Data</th><th>Errors</th></tr>
+            </thead>
+            <tbody>
+                {% for r in rejects %}
+                    <tr>
+                        <td>{{ r.source_file }}</td>
+                        <td>{{ r.source_row_number }}</td>
+                        <td>{{ r.raw_data }}</td>
+                        <td>{{ r.rejection_errors }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="4" class="empty">No ingestion rejects stored for this run.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% include "deduplication/includes/pagination.html" with page_obj=rejects_page page_param="rejects_page" %}
+</section>
+
+<section class="panel">
+    <div class="panelhead">
+        <h2>Published merged records</h2>
+        <a href="{% url 'merged_records' %}">All clean records →</a>
+    </div>
+
+    <div class="tablewrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Canonical ID</th><th>Type</th><th>Merged data</th>
+                    <th>Survivorship</th><th>Lineage</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in merged_records %}
+                    <tr>
+                        <td>{{ r.canonical_id }}</td>
+                        <td>{{ r.record_type }}</td>
+                        <td><div class="json">{{ r.merged_data }}</div></td>
+                        <td><div class="json">{{ r.survivorship_explanation }}</div></td>
+                        <td>
+                            {% for l in r.lineage.all %}
+                                <div class="tiny">
+                                    {{ l.source_record.source_record_id|default:l.source_record_id }}
+                                </div>
+                            {% empty %}
+                                —
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="5" class="empty">No merged records published yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% include "deduplication/includes/pagination.html" with page_obj=merged_page page_param="merged_page" %}
+</section>
+{% endblock %}

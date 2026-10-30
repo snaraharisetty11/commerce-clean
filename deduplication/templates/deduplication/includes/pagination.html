@@ -1,0 +1,25 @@
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="pagination" aria-label="Table pagination">
+    <span class="muted">
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        · {{ page_obj.paginator.count }} total
+    </span>
+
+    <div class="actions">
+        {% if page_obj.has_previous %}
+            <a class="btn secondary"
+               href="?{{ page_param }}={{ page_obj.previous_page_number }}#{{ page_param }}">
+                Previous
+            </a>
+        {% endif %}
+
+        {% if page_obj.has_next %}
+            <a class="btn secondary"
+               href="?{{ page_param }}={{ page_obj.next_page_number }}#{{ page_param }}">
+                Next
+            </a>
+        {% endif %}
+    </div>
+</nav>
+{% endif %}

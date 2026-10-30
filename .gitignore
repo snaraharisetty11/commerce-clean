@@ -1,0 +1,48 @@
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Django
+db.sqlite3
+db_backup*.sqlite3
+*.sqlite3
+media/
+staticfiles/
+
+# Generated data and exports
+sqlite_export.json
+data/processed/
+data/exports/
+
+# Logs and test coverage
+*.log
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Editor and operating system
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Large generated benchmark datasets
+data/generated/large/
+data/generated/medium/

@@ -1,0 +1,19 @@
+
+{% extends "deduplication/base.html" %}
+{% block title %}Pipeline runs{% endblock %}
+{% block crumb %}RUN HISTORY{% endblock %}
+{% block content %}
+<div class="head"><div><div class="eyebrow">Audit history</div><h1>Pipeline runs</h1>
+<p class="muted">Inspect processing status, counts, and run details.</p></div>
+<a class="btn" href="{% url 'upload_csv' %}">＋ New run</a></div>
+<section class="panel"><div class="tablewrap"><table>
+<thead><tr><th>Run ID</th><th>Status</th><th>Domain</th><th>Input</th><th>Valid</th><th>Rejected</th><th>Started</th><th></th></tr></thead>
+<tbody>{% for run in runs %}
+<tr><td>{{ run.run_id }}</td><td><span class="badge {{ run.status }}">{{ run.status }}</span></td>
+<td>{{ run.record_type|default:"—" }}</td><td>{{ run.input_count|default:0 }}</td>
+<td>{{ run.valid_count|default:0 }}</td><td>{{ run.rejected_count|default:0 }}</td>
+<td>{{ run.started_at|date:"Y-m-d H:i" }}</td>
+<td><a class="btn secondary small" href="{% url 'run_detail' run.run_id %}">Details</a></td></tr>
+{% empty %}<tr><td colspan="8" class="empty"><strong>No runs yet</strong>Upload a dataset to start.</td></tr>
+{% endfor %}</tbody></table></div></section>
+{% endblock %}

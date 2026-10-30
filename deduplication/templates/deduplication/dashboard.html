@@ -1,0 +1,42 @@
+
+{% extends "deduplication/base.html" %}
+{% block title %}Overview{% endblock %}
+{% block crumb %}OVERVIEW{% endblock %}
+{% block content %}
+<div class="head">
+  <div><div class="eyebrow">Operations center</div>
+  <h1>Data quality overview</h1>
+  <p class="muted">Monitor ingestion, review duplicate candidates, and publish trusted records.</p></div>
+  <a class="btn" href="{% url 'upload_csv' %}">＋ Import dataset</a>
+</div>
+<div class="stats">
+  <div class="stat"><span>Pipeline runs</span><strong>{{ run_count }}</strong></div>
+  <div class="stat"><span>Valid records</span><strong>{{ valid_count }}</strong></div>
+  <div class="stat"><span>Invalid records</span><strong>{{ rejected_count }}</strong></div>
+  <div class="stat"><span>Pending reviews</span><strong>{{ pending_count }}</strong></div>
+</div>
+<section class="panel">
+  <div class="panelhead"><h2>Recent pipeline runs</h2><a href="{% url 'run_list' %}">View all →</a></div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Run</th><th>Status</th><th>Type</th><th>Input</th><th>Valid</th><th>Started</th></tr></thead>
+    <tbody>
+    {% for run in runs %}
+    <tr><td><a href="{% url 'run_detail' run.run_id %}">{{ run.run_id|truncatechars:15 }}</a></td>
+      <td><span class="badge {{ run.status }}">{{ run.status }}</span></td>
+      <td>{{ run.record_type|default:"—" }}</td><td>{{ run.input_count|default:0 }}</td>
+      <td>{{ run.valid_count|default:0 }}</td><td>{{ run.started_at|date:"M d, H:i" }}</td></tr>
+    {% empty %}
+    <tr><td colspan="6" class="empty"><strong>No runs yet</strong>Import a CSV dataset to begin.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+</section>
+<div class="panel"><div class="panelhead"><h2>Quick actions</h2></div>
+  <div class="actions">
+    <a class="btn secondary" href="{% url 'upload_csv' %}">Upload data</a>
+    <a class="btn secondary" href="{% url 'duplicate_reviews' %}">Review candidates</a>
+    <a class="btn secondary" href="{% url 'merged_records' %}">Inspect clean records</a>
+    <a class="btn secondary" href="{% url 'run_list' %}">Audit run history</a>
+  </div>
+</div>
+{% endblock %}

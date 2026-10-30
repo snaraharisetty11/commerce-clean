@@ -1,0 +1,34 @@
+
+{% extends "deduplication/base.html" %}
+{% block title %}Import data{% endblock %}
+{% block crumb %}IMPORT{% endblock %}
+{% block content %}
+<div class="head"><div><div class="eyebrow">Data ingestion</div>
+<h1>Import a dataset</h1>
+<p class="muted">Validate, normalize, match, then route candidates for human review.</p></div></div>
+<div class="formrow">
+<section class="panel">
+  <div class="panelhead"><h2>New processing run</h2><span class="badge">CSV</span></div>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="field"><label for="file">CSV file *</label>
+      <input id="file" name="file" type="file" accept=".csv,text/csv" required>
+      <span class="muted tiny">Choose a CSV with a header row.</span></div>
+    <div class="field"><label for="record_type">Record domain *</label>
+      <select id="record_type" name="record_type">
+        <option value="CUSTOMER">Customers</option><option value="PRODUCT">Products</option>
+      </select></div>
+    <div class="field"><label for="source_system">Source system</label>
+      <input id="source_system" name="source_system" value="CSV" maxlength="120" required></div>
+    <button class="btn" type="submit">Start processing →</button>
+  </form>
+</section>
+<section class="panel"><h2>Expected columns</h2>
+  <p class="muted tiny">Customer dataset</p>
+  <div class="json">source_record_id,name,email,phone</div>
+  <p class="muted tiny" style="margin-top:18px">Product dataset</p>
+  <div class="json">source_record_id,name,sku,price,brand</div>
+  <p class="muted tiny" style="margin-top:18px">Pending candidates are not merged automatically. Review decisions are required before confirmed groups can be published.</p>
+</section>
+</div>
+{% endblock %}
